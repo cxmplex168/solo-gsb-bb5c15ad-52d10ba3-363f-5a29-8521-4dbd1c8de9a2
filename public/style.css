@@ -52,6 +52,36 @@ main {
   box-shadow: 0 2px 8px rgba(107, 68, 35, 0.08);
 }
 
+.mode-switch {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.mode-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #fdfbf8;
+}
+
+.mode-option.selected {
+  border-color: var(--wood);
+  background: var(--wood-light);
+  color: var(--wood-dark);
+}
+
+.mode-option input {
+  accent-color: var(--wood);
+}
+
 .base-fields {
   display: flex;
   gap: 20px;
@@ -131,6 +161,18 @@ h2 {
   padding: 3px 6px;
 }
 
+.material-tag {
+  display: inline-block;
+  min-width: 26px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--wood);
+  border-radius: 4px;
+  padding: 3px 6px;
+}
+
 .row-actions {
   display: flex;
   align-items: center;
@@ -159,6 +201,11 @@ h2 {
 
 .btn:hover {
   filter: brightness(1.08);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .btn-primary {
@@ -270,6 +317,31 @@ h2 {
   font-size: 13px;
   font-weight: 400;
   color: #888;
+}
+
+.bin-price-tag {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--wood);
+}
+
+/* 采购汇总表（复用余料表样式，追加合计行） */
+.remnant-summary-table tfoot td {
+  font-weight: 700;
+  color: var(--wood-dark);
+  border-top: 2px solid var(--wood);
+  border-bottom: none;
+  text-align: right;
+}
+
+.remnant-summary-table tfoot td:last-child {
+  font-size: 16px;
+}
+
+.purchase-empty {
+  color: #888;
+  text-align: center !important;
 }
 
 .remnant-summary-title {

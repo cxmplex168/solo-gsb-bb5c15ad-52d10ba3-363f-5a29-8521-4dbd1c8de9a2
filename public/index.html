@@ -9,19 +9,30 @@
 <body>
   <header class="no-print">
     <h1>木工短料下料优化</h1>
-    <p class="subtitle">输入原料、裁片规格与余料库存，自动计算新料根数最少的裁切方案（总裁片数上限 12 片）</p>
+    <p class="subtitle">输入原料、裁片规格与余料库存，自动计算最优裁切方案（总裁片数上限 12 片）</p>
   </header>
 
   <main>
     <!-- 打印时显示的标题 -->
     <div class="print-only print-header">
-      <h1>木工短料下料方案</h1>
+      <h1 id="print-title">木工短料下料方案</h1>
       <p id="print-time"></p>
     </div>
 
     <section class="card no-print" id="input-card">
+      <div class="mode-switch" role="radiogroup" aria-label="选料模式">
+        <label class="mode-option selected">
+          <input type="radio" name="mode" value="optimize" checked />
+          <span>按根数选料</span>
+        </label>
+        <label class="mode-option">
+          <input type="radio" name="mode" value="quote" />
+          <span>按价格选料（报价）</span>
+        </label>
+      </div>
+
       <div class="base-fields">
-        <label>
+        <label id="stock-length-field">
           原料长度
           <input type="number" id="stock-length" min="0" step="any" value="2440" />
         </label>
@@ -65,21 +76,42 @@
         <span id="remnant-counter" class="piece-counter"></span>
       </div>
 
+      <div id="material-block" hidden>
+        <h2>可购买新料（1～3 种）</h2>
+        <table class="spec-table">
+          <thead>
+            <tr>
+              <th>新料</th>
+              <th>长度</th>
+              <th>单价</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="material-rows"></tbody>
+        </table>
+        <div class="row-actions">
+          <button type="button" id="add-material" class="btn btn-secondary">＋ 添加新料</button>
+          <span id="material-counter" class="piece-counter"></span>
+        </div>
+      </div>
+
       <div id="form-error" class="error" hidden></div>
 
       <div class="actions">
         <button type="button" id="calc-btn" class="btn btn-primary">计算下料方案</button>
       </div>
-      <p class="hint">说明：同规格会展开成单片（A1、A2…）参与计算；仅同一根原料上相邻的两片之间计一条锯缝；每根原料上的裁片按长度从大到小排列，即建议裁切顺序。录入余料后，每根余料最多使用一次，优先保证新料根数最少，再使投入原料总长度最小。</p>
+      <p class="hint" id="hint-optimize">说明：同规格会展开成单片（A1、A2…）参与计算；仅同一根原料上相邻的两片之间计一条锯缝；每根原料上的裁片按长度从大到小排列，即建议裁切顺序。录入余料后，每根余料最多使用一次，优先保证新料根数最少，再使投入原料总长度最小。</p>
+      <p class="hint" id="hint-quote" hidden>说明：余料为已有库存、不计采购价，每根余料最多使用一次；可购买新料数量不限，优化目标依次为<strong>总采购价最低 → 新料根数最少 → 投入原料总长度最小</strong>。长度、单价均须为正数，单价最多两位小数，同长度规格不得重复；长于所有新料的裁片只能由足够长的余料承载。</p>
     </section>
 
     <section id="result" hidden>
       <div class="card">
         <div class="result-head">
-          <h2>计算结果</h2>
+          <h2 id="result-title">计算结果</h2>
           <button type="button" id="print-btn" class="btn btn-secondary no-print">打印方案</button>
         </div>
         <div id="summary" class="summary"></div>
+        <div id="purchase-summary"></div>
         <div id="remnant-summary"></div>
         <div id="bins"></div>
       </div>
@@ -87,7 +119,7 @@
   </main>
 
   <footer class="no-print">
-    <span>长度单位保持一致即可（如毫米）</span>
+    <span>长度单位保持一致即可（如毫米）；单价单位保持一致即可（如元/根）</span>
   </footer>
 
   <script src="app.js"></script>
