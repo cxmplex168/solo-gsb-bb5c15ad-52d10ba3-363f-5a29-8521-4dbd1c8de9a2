@@ -1,5 +1,5 @@
 'use strict';
-const { computeCuttingPlan, ValidationError } = require('./cuttingPlan');
+const { computeCuttingPlan, computeQuotePlan, ValidationError } = require('./cuttingPlan');
 
 let passed = 0;
 let failed = 0;
@@ -222,6 +222,211 @@ check('12 片 + 12 根余料在 10 秒内完成', () => {
   assert(ms < 10000, `耗时 ${ms}ms 超过 10 秒`);
   assert(r.binCount >= 1, '应有结果');
   console.log(`  （耗时 ${ms}ms，新料 ${r.newBinCount} 根，余料 ${r.remnantBinCount} 根）`);
+});
+
+// ===== 按价格选料模式（/api/quote，computeQuotePlan）=====
+
+// 13) 总采购价最低：两根便宜短料优于一根贵长料
+check('报价模式：选择总采购价最低的新料组合', () => {
+  const r = computeQuotePlan({
+    kerf: 3,
+    items: [{ length: 800, qty: 2 }],
+    materials: [
+      { length: 2440, price: 100 },
+      { length: 900, price: 40 },
+    ],
+  });
+  assert(r.totalPrice === 80, `总采购价应为 80，实际 ${r.totalPrice}`);
+  assert(r.newBinCount === 2 && r.remnantBinCount === 0, '应购买 2 根 900 新料');
+  assert(r.bins.every((b) => b.source === 'new' && b.stockLength === 900), '每根应为 900 新料');
+  assert(r.bins.every((b) => b.price === 40), '每根新料应带单价 40');
+  const p = r.purchase.find((x) => x.length === 900);
+  assert(p.count === 2 && p.subtotal === 80, '900 新料采购 2 根、小计 80');
+  const p2 = r.purchase.find((x) => x.length === 2440);
+  assert(p2.count === 0 && p2.subtotal === 0, '2440 新料不应购买');
+});
+
+// 14) 同价时新料根数最少
+check('报价模式：同价时选择新料根数最少', () => {
+  const r = computeQuotePlan({
+    kerf: 0,
+    items: [{ length: 500, qty: 2 }],
+    materials: [
+      { length: 1000, price: 50 },
+      { length: 600, price: 25 },
+    ],
+  });
+  assert(r.totalPrice === 50, `总采购价应为 50，实际 ${r.totalPrice}`);
+  assert(r.newBinCount === 1, `应只买 1 根长料，实际 ${r.newBinCount}`);
+  assert(r.bins[0].stockLength === 1000, `应选 1000 新料，实际 ${r.bins[0].stockLength}`);
+});
+
+// 15) 同价同根数时投入原料总长度最小
+check('报价模式：同价同根数时投入总长度最小', () => {
+  const r = computeQuotePlan({
+    kerf: 0,
+    items: [{ length: 500, qty: 1 }],
+    materials: [
+      { length: 1000, price: 50 },
+      { length: 600, price: 50 },
+    ],
+  });
+  assert(r.totalStockLength === 600, `投入总长应为 600，实际 ${r.totalStockLength}`);
+});
+
+// 16) 余料免费，优先使用，采购价为 0
+check('报价模式：余料可容纳全部裁片时采购价为 0', () => {
+  const r = computeQuotePlan({
+    kerf: 0,
+    items: [{ length: 500, qty: 3 }],
+    materials: [{ length: 2440, price: 100 }],
+    remnants: [{ length: 1600, qty: 1 }, { length: 1100, qty: 1 }],
+  });
+  assert(r.totalPrice === 0, `采购价应为 0，实际 ${r.totalPrice}`);
+  assert(r.newBinCount === 0 && r.remnantBinCount === 1, '应只用 1 根余料');
+  assert(r.bins[0].stockLength === 1600, `应选 1600 余料，实际 ${r.bins[0].stockLength}`);
+});
+
+// 17) 每根余料最多用一次：缺料必须购买新料
+check('报价模式：余料每根最多用一次', () => {
+  const r = computeQuotePlan({
+    kerf: 0,
+    items: [{ length: 1500, qty: 2 }],
+    materials: [{ length: 2440, price: 100 }],
+    remnants: [{ length: 1600, qty: 1 }],
+  });
+  assert(r.remnantBinCount === 1, `应使用 1 根余料，实际 ${r.remnantBinCount}`);
+  assert(r.newBinCount === 1, `应购买 1 根新料，实际 ${r.newBinCount}`);
+  assert(r.totalPrice === 100, `采购价应为 100，实际 ${r.totalPrice}`);
+  const rem = r.remnants.find((x) => x.length === 1600);
+  assert(rem.used === 1 && rem.remaining === 0, '余料应消耗 1 根剩 0 根');
+});
+
+// 18) 锯缝仍只计同根相邻裁片
+check('报价模式：锯缝按同根相邻裁片计算', () => {
+  // 800+3+800=1603：两根 1600（100 元）不如一根 2000（60 元）
+  const r = computeQuotePlan({
+    kerf: 3,
+    items: [{ length: 800, qty: 2 }],
+    materials: [
+      { length: 1600, price: 50 },
+      { length: 2000, price: 60 },
+    ],
+  });
+  assert(r.totalPrice === 60, `采购价应为 60，实际 ${r.totalPrice}`);
+  assert(r.bins[0].cuts === 1 && r.bins[0].usedLength === 1603, '应计 1 条锯缝、已用 1603');
+});
+
+// 19) 长于所有新料的裁片由足够长的余料承载
+check('报价模式：超长裁片可由余料承载', () => {
+  const r = computeQuotePlan({
+    kerf: 3,
+    items: [{ length: 3000, qty: 1 }, { length: 500, qty: 1 }],
+    materials: [{ length: 2440, price: 100 }],
+    remnants: [{ length: 3100, qty: 1 }],
+  });
+  assert(r.remnantBinCount === 1 && r.newBinCount === 1, '应 1 根余料 + 1 根新料');
+  assert(r.totalPrice === 100, `采购价应为 100，实际 ${r.totalPrice}`);
+  assert(r.bins.find((b) => b.source === 'remnant').stockLength === 3100, '超长片应由 3100 余料承载');
+});
+
+// 20) 无可行方案：超长裁片余料不足
+check('报价模式：超长裁片余料不足时给出明确原因', () => {
+  let msg = '';
+  try {
+    computeQuotePlan({
+      kerf: 0,
+      items: [{ length: 2000, qty: 2 }],
+      materials: [{ length: 1500, price: 50 }],
+      remnants: [{ length: 3000, qty: 1 }],
+    });
+  } catch (e) {
+    msg = e.message;
+    assert(e instanceof ValidationError, '应为 ValidationError');
+  }
+  assert(msg.includes('无可行方案') && msg.includes('2000'), `报错信息不明确：${msg}`);
+});
+
+// 21) 新料录入校验：种类数、正数、两位小数、重复长度
+check('报价模式：新料参数非法时报错', () => {
+  const base = { kerf: 3, items: [{ length: 100, qty: 1 }] };
+  for (const materials of [
+    [],
+    [
+      { length: 1000, price: 1 },
+      { length: 2000, price: 2 },
+      { length: 3000, price: 3 },
+      { length: 4000, price: 4 },
+    ],
+    [{ length: 0, price: 10 }],
+    [{ length: 1000, price: -5 }],
+    [{ length: 1000, price: 10.234 }],
+    [{ length: 1000, price: 10 }, { length: 1000, price: 12 }],
+  ]) {
+    let ok = false;
+    try {
+      computeQuotePlan(Object.assign({}, base, { materials }));
+    } catch (e) {
+      ok = e instanceof ValidationError;
+    }
+    assert(ok, `应拒绝非法新料 ${JSON.stringify(materials)}`);
+  }
+});
+
+// 22) 报价模式汇总数字自洽
+check('报价模式：采购汇总与各根一致', () => {
+  const r = computeQuotePlan({
+    kerf: 3,
+    items: [
+      { length: 1200, qty: 2 },
+      { length: 800, qty: 2 },
+    ],
+    materials: [
+      { length: 2440, price: 99.5 },
+      { length: 1300, price: 55 },
+    ],
+    remnants: [{ length: 1300, qty: 2 }, { length: 900, qty: 1 }],
+  });
+  const purchased = r.purchase.reduce((s, p) => s + p.count, 0);
+  assert(purchased === r.newBinCount, '采购根数合计应等于新料根数');
+  const subtotalSum = r.purchase.reduce((s, p) => s + p.subtotal, 0);
+  assert(Math.abs(subtotalSum - r.totalPrice) < 1e-9, '小计合计应等于总采购价');
+  const binSum = r.bins
+    .filter((b) => b.source === 'new')
+    .reduce((s, b) => s + b.price, 0);
+  assert(Math.abs(binSum - r.totalPrice) < 1e-9, '各根单价合计应等于总采购价');
+  const stockSum = r.bins.reduce((s, b) => s + b.stockLength, 0);
+  assert(Math.abs(stockSum - r.totalStockLength) < 1e-6, 'totalStockLength 应等于各根之和');
+  assert(r.remnants.every((x) => x.used + x.remaining === x.available), '余料消耗+剩余应等于可用');
+});
+
+// 23) 报价模式性能：3 种新料 + 12 片 + 12 根余料
+check('报价模式：12 片 + 12 根余料 + 3 种新料在 10 秒内完成', () => {
+  const t0 = Date.now();
+  const r = computeQuotePlan({
+    kerf: 3,
+    items: [
+      { length: 800, qty: 3 },
+      { length: 650, qty: 3 },
+      { length: 500, qty: 3 },
+      { length: 320, qty: 3 },
+    ],
+    materials: [
+      { length: 2440, price: 120 },
+      { length: 1800, price: 90 },
+      { length: 1200, price: 62.5 },
+    ],
+    remnants: [
+      { length: 1500, qty: 3 },
+      { length: 1200, qty: 3 },
+      { length: 900, qty: 3 },
+      { length: 700, qty: 3 },
+    ],
+  });
+  const ms = Date.now() - t0;
+  assert(ms < 10000, `耗时 ${ms}ms 超过 10 秒`);
+  assert(r.binCount >= 1, '应有结果');
+  console.log(`  （耗时 ${ms}ms，总价 ${r.totalPrice}，新料 ${r.newBinCount} 根，余料 ${r.remnantBinCount} 根）`);
 });
 
 console.log(`\n${passed} 通过，${failed} 失败`);

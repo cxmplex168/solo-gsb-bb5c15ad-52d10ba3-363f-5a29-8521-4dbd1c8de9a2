@@ -2,7 +2,7 @@
 
 const path = require('path');
 const express = require('express');
-const { computeCuttingPlan } = require('./cuttingPlan');
+const { computeCuttingPlan, computeQuotePlan } = require('./cuttingPlan');
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
@@ -15,7 +15,7 @@ app.get('/api/health', (req, res) => {
   res.json({ ok: true });
 });
 
-// 下料优化计算
+// 下料优化计算（根数模式：新料根数最少 → 投入原料总长度最小）
 app.post('/api/optimize', (req, res) => {
   try {
     const result = computeCuttingPlan(req.body || {});
@@ -25,6 +25,20 @@ app.post('/api/optimize', (req, res) => {
       return res.status(400).json({ ok: false, error: err.message });
     }
     console.error('计算失败：', err);
+    res.status(500).json({ ok: false, error: '服务器内部错误，请稍后重试' });
+  }
+});
+
+// 按价格选料报价（总采购价最低 → 新料根数最少 → 投入原料总长度最小）
+app.post('/api/quote', (req, res) => {
+  try {
+    const result = computeQuotePlan(req.body || {});
+    res.json({ ok: true, result });
+  } catch (err) {
+    if (err && err.isValidation) {
+      return res.status(400).json({ ok: false, error: err.message });
+    }
+    console.error('报价计算失败：', err);
     res.status(500).json({ ok: false, error: '服务器内部错误，请稍后重试' });
   }
 });

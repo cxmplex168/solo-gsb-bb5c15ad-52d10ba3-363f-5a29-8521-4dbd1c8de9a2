@@ -52,6 +52,30 @@ main {
   box-shadow: 0 2px 8px rgba(107, 68, 35, 0.08);
 }
 
+.mode-switch {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  background: var(--wood-light);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.mode-switch label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.mode-switch input[type="radio"] {
+  width: auto;
+  accent-color: var(--wood);
+}
+
 .base-fields {
   display: flex;
   gap: 20px;
@@ -131,6 +155,18 @@ h2 {
   padding: 3px 6px;
 }
 
+.material-tag {
+  display: inline-block;
+  min-width: 26px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--wood);
+  border-radius: 4px;
+  padding: 3px 6px;
+}
+
 .row-actions {
   display: flex;
   align-items: center;
@@ -171,6 +207,11 @@ h2 {
   background: var(--wood-light);
   color: var(--wood-dark);
   border: 1px solid var(--line);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .btn-remove {
@@ -272,6 +313,16 @@ h2 {
   color: #888;
 }
 
+.bin-price {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--wood-dark);
+  background: var(--wood-light);
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+
 .remnant-summary-title {
   font-size: 15px;
   margin: 0 0 8px;
@@ -296,6 +347,22 @@ h2 {
   color: var(--wood-dark);
   font-weight: 600;
   background: var(--wood-light);
+}
+
+.purchase-table tfoot td {
+  border-bottom: none;
+  border-top: 2px solid var(--wood);
+  font-size: 14px;
+  text-align: right;
+}
+
+.purchase-table tfoot td:first-child {
+  text-align: left;
+}
+
+.purchase-table tfoot strong {
+  color: var(--wood-dark);
+  font-size: 15px;
 }
 
 .bin-seq {
@@ -398,6 +465,8 @@ footer {
 
   .bar .seg,
   .source-tag,
+  .material-tag,
+  .bin-price,
   .remnant-summary-table th {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
