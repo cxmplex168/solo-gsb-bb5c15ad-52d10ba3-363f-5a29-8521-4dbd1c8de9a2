@@ -1,0 +1,17 @@
+{
+  "name": "woodcut-optimizer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "木工工作室短料下料优化：输入原料长度、锯缝宽度与各规格数量，计算用料根数最少的裁切方案",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test-cuttingPlan.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

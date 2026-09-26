@@ -1,0 +1,405 @@
+:root {
+  --wood: #8b5a2b;
+  --wood-dark: #6b4423;
+  --wood-light: #f5ede1;
+  --ink: #2e2a26;
+  --line: #e0d5c5;
+  --error: #b3261e;
+  --ok-bg: #fbf8f3;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  color: var(--ink);
+  background: var(--ok-bg);
+}
+
+header {
+  background: linear-gradient(135deg, var(--wood), var(--wood-dark));
+  color: #fff;
+  padding: 28px 20px;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0 0 8px;
+  font-size: 26px;
+  letter-spacing: 2px;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+main {
+  max-width: 860px;
+  margin: 24px auto 48px;
+  padding: 0 16px;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(107, 68, 35, 0.08);
+}
+
+.base-fields {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.base-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+input[type="number"] {
+  width: 160px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 15px;
+}
+
+input[type="number"]:focus {
+  outline: 2px solid var(--wood);
+  outline-offset: 1px;
+}
+
+h2 {
+  font-size: 17px;
+  margin: 8px 0 12px;
+  color: var(--wood-dark);
+}
+
+.spec-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.spec-table th,
+.spec-table td {
+  padding: 8px 6px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.spec-table th {
+  color: var(--wood-dark);
+  font-weight: 600;
+}
+
+.spec-table input[type="number"] {
+  width: 120px;
+}
+
+.spec-letter {
+  display: inline-block;
+  min-width: 26px;
+  text-align: center;
+  font-weight: 700;
+  color: var(--wood-dark);
+  background: var(--wood-light);
+  border-radius: 4px;
+  padding: 3px 6px;
+}
+
+.remnant-tag {
+  display: inline-block;
+  min-width: 26px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #4a6b2a;
+  background: #e9f2dc;
+  border-radius: 4px;
+  padding: 3px 6px;
+}
+
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.piece-counter {
+  font-size: 13px;
+  color: #777;
+}
+
+.piece-counter.over {
+  color: var(--error);
+  font-weight: 600;
+}
+
+.btn {
+  border: none;
+  border-radius: 6px;
+  padding: 10px 22px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+
+.btn:hover {
+  filter: brightness(1.08);
+}
+
+.btn-primary {
+  background: var(--wood);
+  color: #fff;
+  font-weight: 600;
+}
+
+.btn-secondary {
+  background: var(--wood-light);
+  color: var(--wood-dark);
+  border: 1px solid var(--line);
+}
+
+.btn-remove {
+  background: none;
+  border: none;
+  color: var(--error);
+  cursor: pointer;
+  font-size: 15px;
+  padding: 4px 8px;
+}
+
+.actions {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.error {
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: #fdecea;
+  border: 1px solid #f5c6c2;
+  border-radius: 6px;
+  color: var(--error);
+  font-size: 14px;
+}
+
+.hint {
+  margin-top: 16px;
+  font-size: 12px;
+  color: #999;
+  line-height: 1.7;
+}
+
+/* 结果区 */
+.result-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.result-head h2 {
+  margin: 0;
+}
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  padding: 12px 16px;
+  background: var(--wood-light);
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 18px;
+}
+
+.summary strong {
+  color: var(--wood-dark);
+}
+
+.bin {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  page-break-inside: avoid;
+}
+
+.bin-title {
+  font-weight: 700;
+  color: var(--wood-dark);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.source-tag {
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+
+.source-tag.new {
+  color: #fff;
+  background: var(--wood);
+}
+
+.source-tag.remnant {
+  color: #4a6b2a;
+  background: #e9f2dc;
+  border: 1px solid #cfdcb4;
+}
+
+.bin-stock-len {
+  font-size: 13px;
+  font-weight: 400;
+  color: #888;
+}
+
+.remnant-summary-title {
+  font-size: 15px;
+  margin: 0 0 8px;
+  color: var(--wood-dark);
+}
+
+.remnant-summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 18px;
+}
+
+.remnant-summary-table th,
+.remnant-summary-table td {
+  padding: 7px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.remnant-summary-table th {
+  color: var(--wood-dark);
+  font-weight: 600;
+  background: var(--wood-light);
+}
+
+.bin-seq {
+  font-size: 14px;
+  margin-bottom: 8px;
+  line-height: 1.8;
+}
+
+.bin-seq .arrow {
+  color: var(--wood);
+  margin: 0 4px;
+}
+
+.bin-seq .leftover-tag {
+  color: #777;
+}
+
+.bar {
+  display: flex;
+  height: 26px;
+  border: 1px solid var(--wood-dark);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.bar .seg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: var(--wood);
+  white-space: nowrap;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.bar .seg.kerf {
+  background: repeating-linear-gradient(45deg, #b3261e, #b3261e 2px, #e8a09b 2px, #e8a09b 4px);
+  flex: 0 0 auto;
+}
+
+.bar .seg.leftover {
+  background: #d9d2c7;
+  color: #6b6257;
+}
+
+.bin-meta {
+  font-size: 13px;
+  color: #666;
+}
+
+footer {
+  text-align: center;
+  font-size: 12px;
+  color: #aaa;
+  padding-bottom: 24px;
+}
+
+.print-only {
+  display: none;
+}
+
+/* 打印样式：只保留方案内容 */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block;
+  }
+
+  body {
+    background: #fff;
+  }
+
+  main {
+    margin: 0;
+    max-width: none;
+  }
+
+  .card {
+    border: none;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .print-header h1 {
+    font-size: 20px;
+    margin: 0 0 4px;
+  }
+
+  .print-header p {
+    font-size: 12px;
+    color: #666;
+    margin: 0 0 12px;
+  }
+
+  .bar .seg,
+  .source-tag,
+  .remnant-summary-table th {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

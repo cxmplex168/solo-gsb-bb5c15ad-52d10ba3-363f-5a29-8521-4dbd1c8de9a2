@@ -1,0 +1,24 @@
+services:
+  woodcut:
+    build: .
+    image: woodcut-optimizer:latest
+    container_name: woodcut-optimizer
+    ports:
+      # 宿主机端口:容器端口（默认 3000:3000，可用环境变量 PORT 修改）
+      - "${PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    volumes:
+      # 持久化容器启动时安装的依赖，避免每次启动重复 npm install
+      - woodcut_node_modules:/app/node_modules
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  woodcut_node_modules:
